@@ -10,39 +10,35 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x]
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    
-    - name: Install root dependencies
-      run: npm ci
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+          cache: 'npm'
+      
+      - name: Install root dependencies
+        run: npm install
 
-    - name: Install backend dependencies
-      run: npm ci
-      working-directory: backend
+      - name: Install backend dependencies
+        run: npm install
+        working-directory: backend
 
-    - name: Install frontend dependencies
-      run: npm ci
-      working-directory: frontend
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: frontend
 
-    - name: Build frontend
-      run: npm run build
-      working-directory: frontend
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
 
-    - name: Lint frontend code
-      run: npm run lint
-      working-directory: frontend
+      - name: Lint frontend code
+        run: npm run lint
+        working-directory: frontend
 
-    - name: Run frontend tests
-      run: npm test || true
-      working-directory: frontend
+      - name: Run frontend tests
+        run: npm test || true
+        working-directory: frontend
