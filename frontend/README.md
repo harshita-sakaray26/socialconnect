@@ -1,42 +1,41 @@
-# SocialConnect - Frontend
+# SocialConnect Frontend
 
-A modern social networking platform built with React and Vite. Connect with friends, discover new people, plan hangouts, and chat in real-time.
+A modern social networking app built with React and Vite. Connect with friends, discover new people, plan hangouts, and chat in real-time.
 
 ## Features
 
-- 🔐 **Authentication** - Secure user login and registration
-- 👤 **Profile Management** - Create and edit your profile
-- 🔍 **Discover People** - Find and connect with new users
-- 🎉 **Hangouts** - Plan and organize hangouts with friends
-- 💬 **Real-time Chat** - Instant messaging with Socket.io
-- 🔔 **Notifications** - Stay updated with real-time notifications
-- ⚙️ **Settings** - Customize your preferences
-- 🛡️ **Admin Panel** - Manage platform content and users
+- 🔐 Secure user authentication
+- 👤 Profile management
+- 🔍 Discover and connect with people
+- 🎉 Create and join hangouts
+- 💬 Real-time chat
+- 🔔 Notifications
+- ⚙️ User settings
+- 🛡️ Admin panel
 
 ## Tech Stack
 
-- **React 19** - UI library
-- **Vite** - Lightning-fast build tool with HMR
-- **React Router** - Client-side routing
-- **Tailwind CSS** - Utility-first CSS framework
-- **Socket.io Client** - Real-time communication
-- **Axios** - HTTP client
-- **Framer Motion** - Smooth animations
-- **Lucide React** - Beautiful icon library
-- **ESLint** - Code quality and consistency
+- React 19
+- Vite
+- React Router
+- Tailwind CSS
+- Socket.io Client
+- Axios
+- Framer Motion
+- Lucide React
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### Requirements
 
-- Node.js (v16+)
+- Node.js v16+
 - npm or yarn
 
-### Installation
+### Setup
 
-1. Clone the repository:
+1. Clone the repo and navigate to the frontend folder:
 ```bash
-git clone https://github.com/yourusername/socialconnect.git
+git clone https://github.com/harshita-sakaray26/socialconnect.git
 cd socialconnect/frontend
 ```
 
@@ -45,115 +44,69 @@ cd socialconnect/frontend
 npm install
 ```
 
-3. Create a `.env` file with your backend URL:
+3. Create a `.env` file:
 ```
 VITE_API_URL=http://localhost:5000
 ```
 
-### Development
-
-Run the development server with hot module replacement:
-
+4. Run the dev server:
 ```bash
 npm run dev
 ```
 
-The app will open automatically at `http://localhost:5173/`
+The app opens automatically at `http://localhost:5173/`
 
-### Building
+## Available Scripts
 
-Build for production:
-
-```bash
-npm run build
-```
-
-Preview the production build:
-
-```bash
-npm run preview
-```
-
-### Linting
-
-Check code quality:
-
-```bash
-npm run lint
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Check code quality
 
 ## Project Structure
 
 ```
 src/
-├── components/     # Reusable React components
-├── pages/         # Page components
-├── context/       # React Context (Auth)
-├── api.js         # API client configuration
-├── App.jsx        # Main app component
-├── main.jsx       # Entry point
-└── index.css      # Global styles
+├── components/   # Reusable components
+├── pages/        # Page components
+├── context/      # Auth context
+├── api.js        # API calls
+├── App.jsx       # Main app
+└── main.jsx      # Entry point
 ```
 
-## Key Pages
+## Pages
 
-- `/` - Landing page
-- `/login` - User login
-- `/register` - User registration
-- `/discover` - Discover new people
-- `/hangouts` - View and create hangouts
-- `/profile` - View user profile
-- `/edit-profile` - Edit profile information
-- `/chat` - Real-time messaging
-- `/notifications` - User notifications
-- `/settings` - User settings
-- `/admin` - Admin dashboard
-
-## API Integration
-
-The frontend communicates with the backend API via Axios. Base URL is configured in `.env` file.
-
-Common endpoints:
-- `POST /auth/login` - User login
-- `POST /auth/register` - User registration
-- `GET /users/discover` - Discover people
-- `GET /hangouts` - Get user's hangouts
-- `GET /profile` - Get user profile
+- `/` - Home
+- `/login` - Login
+- `/register` - Sign up
+- `/discover` - Find people
+- `/hangouts` - Hangouts
+- `/profile` - Your profile
+- `/chat` - Messages
+- `/notifications` - Updates
+- `/settings` - Preferences
+- `/admin` - Admin panel
 
 ## Authentication
 
-Uses JWT (JSON Web Tokens) stored in localStorage. The `AuthContext` manages authentication state across the app. Private routes are protected with the `PrivateRoute` component.
+Uses JWT tokens stored in localStorage. The `AuthContext` handles auth state and private routes require login.
 
 ## Real-time Features
 
-Socket.io client handles real-time notifications, chat messages, and live updates. Connection is established on app load and managed through React Context.
+Socket.io is used for live chat, notifications, and instant updates.
 
 ## Browser Support
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+Works on Chrome, Firefox, Safari, and Edge.
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Fork the repo
+2. Create a feature branch
+3. Commit your changes
+4. Push and open a PR
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support, email support@socialconnect.com or open an issue on GitHub.
-
-## Acknowledgments
-
-- [React Documentation](https://react.dev)
-- [Vite Documentation](https://vite.dev)
-- [Tailwind CSS](https://tailwindcss.com)
-- [Socket.io](https://socket.io)
+MIT License
