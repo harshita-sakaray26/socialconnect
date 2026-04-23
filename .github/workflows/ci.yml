@@ -24,14 +24,25 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
-    - name: Install dependencies
-      run: npm run install-all
-    
+    - name: Install root dependencies
+      run: npm ci
+
+    - name: Install backend dependencies
+      run: npm ci
+      working-directory: backend
+
+    - name: Install frontend dependencies
+      run: npm ci
+      working-directory: frontend
+
     - name: Build frontend
-      run: cd frontend && npm run build
-    
+      run: npm run build
+      working-directory: frontend
+
     - name: Lint frontend code
-      run: cd frontend && npm run lint
-    
-    - name: Run frontend tests (if available)
-      run: cd frontend && npm test -- --passWithNoTests || true
+      run: npm run lint
+      working-directory: frontend
+
+    - name: Run frontend tests
+      run: npm test || true
+      working-directory: frontend
