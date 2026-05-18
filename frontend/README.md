@@ -107,6 +107,7 @@ Works on Chrome, Firefox, Safari, and Edge.
 3. Commit your changes
 4. Push and open a PR
 
+
 ## License
 
 MIT License
