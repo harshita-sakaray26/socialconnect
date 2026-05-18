@@ -45,4 +45,4 @@ const seedDB = async () => {
   console.log('In-memory cache seeded with dummy data.');
 };
 
-module.exports = { users, hangouts, conversations, messages, seedDB };
+module.exports = { users, hangouts, conversations, messages, friendRequests, seedDB };

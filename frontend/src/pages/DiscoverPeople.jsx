@@ -1,28 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import api from '../api';
-import { motion } from 'framer-motion';
-import { MapPin, Search, Filter, X, BadgeCheck, Users as UsersIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, Search, Filter, X, BadgeCheck, Users as UsersIcon, Clock, Check, UserPlus } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 const INTEREST_FILTERS = ['All', 'Coding', 'Coffee', 'Hiking', 'Photography', 'Music', 'Gaming', 'Art', 'Fitness', 'Travel', 'Tech'];
 
 export default function DiscoverPeople() {
+  const { user: currentUser } = useContext(AuthContext);
   const [users, setUsers] = useState([]);
+  const [sentRequests, setSentRequests] = useState([]);
+  const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
 
+  const fetchData = async () => {
+    try {
+      const [usersRes, sentRes, pendingRes] = await Promise.all([
+        api.get('/users'),
+        api.get('/users/sent'),
+        api.get('/users/pending')
+      ]);
+      setUsers(usersRes.data);
+      setSentRequests(sentRes.data);
+      setPendingRequests(pendingRes.data);
+    } catch (err) {
+      console.error(err);
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await api.get('/users');
-        setUsers(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-      setLoading(false);
-    };
-    fetchUsers();
+    fetchData();
   }, []);
+
+  const handleConnect = async (targetId) => {
+    try {
+      await api.post(`/users/request/${targetId}`);
+      fetchData(); // refresh data
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.msg || "Error sending request");
+    }
+  };
+
+  const handleAccept = async (requestId) => {
+    try {
+      await api.post(`/users/accept/${requestId}`);
+      fetchData(); // refresh data
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const filtered = users.filter(u => {
     const matchesSearch = u.fullName?.toLowerCase().includes(search.toLowerCase()) || u.city?.toLowerCase().includes(search.toLowerCase());
@@ -33,6 +63,36 @@ export default function DiscoverPeople() {
   return (
     <div className="min-h-screen mesh-gradient">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Pending Requests Section */}
+        {pendingRequests.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                <Clock size={16} />
+              </span>
+              Pending Friend Requests
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {pendingRequests.map(req => (
+                <div key={req._id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-4">
+                  <img src={req.sender?.profilePicture || 'https://via.placeholder.com/150'} alt={req.sender?.fullName} className="w-12 h-12 rounded-xl object-cover" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-slate-900 truncate">{req.sender?.fullName}</h3>
+                    <p className="text-xs text-slate-500">Wants to connect</p>
+                  </div>
+                  <button 
+                    onClick={() => handleAccept(req._id)}
+                    className="px-4 py-2 bg-primary-500 text-white text-sm font-bold rounded-xl shadow-sm hover:bg-primary-600 transition"
+                  >
+                    Accept
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-slate-900 font-[family-name:var(--font-display)] flex items-center gap-3">
@@ -105,60 +165,80 @@ export default function DiscoverPeople() {
         ) : (
           /* User Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((user, i) => (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05, duration: 0.3 }}
-                key={user._id}
-                className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm card-hover group">
-                {/* Cover gradient */}
-                <div className="h-28 bg-gradient-to-r from-primary-400 via-accent-400 to-pink-400 relative">
-                  <div className="absolute inset-0 bg-black/5" />
-                  <img src={user.profilePicture} alt={user.fullName}
-                    className="w-20 h-20 rounded-2xl border-4 border-white absolute -bottom-10 left-6 object-cover bg-white shadow-lg group-hover:scale-105 transition-transform" />
-                  {user.isVerified && (
-                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-xs font-bold text-primary-700 flex items-center gap-1 shadow-sm">
-                      <BadgeCheck size={12} className="text-blue-500" /> Verified
-                    </div>
-                  )}
-                </div>
+            {filtered.map((user, i) => {
+              const isFriend = user.friends?.includes(currentUser?.id) || currentUser?.friends?.includes(user._id);
+              const hasSent = sentRequests.some(r => r.to === user._id);
+              const hasReceived = pendingRequests.find(r => r.from === user._id);
 
-                <div className="pt-14 p-6">
-                  <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    {user.fullName}
-                    <span className="text-sm font-normal text-slate-400">{user.age || ''}</span>
-                  </h3>
-                  <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
-                    <MapPin size={13} /> {user.city || 'Unknown'}
-                  </p>
-
-                  {user.bio && <p className="text-sm text-slate-600 mt-3 line-clamp-2">{user.bio}</p>}
-
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {user.interests?.slice(0, 4).map((interest, idx) => (
-                      <span key={idx} className="px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold">
-                        {interest}
-                      </span>
-                    ))}
-                    {user.interests?.length > 4 && (
-                      <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-semibold">
-                        +{user.interests.length - 4}
-                      </span>
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                  key={user._id}
+                  className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm card-hover group">
+                  {/* Cover gradient */}
+                  <div className="h-28 bg-gradient-to-r from-primary-400 via-accent-400 to-pink-400 relative">
+                    <div className="absolute inset-0 bg-black/5" />
+                    <img src={user.profilePicture || 'https://via.placeholder.com/150'} alt={user.fullName}
+                      className="w-20 h-20 rounded-2xl border-4 border-white absolute -bottom-10 left-6 object-cover bg-white shadow-lg group-hover:scale-105 transition-transform" />
+                    {user.isVerified && (
+                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-xs font-bold text-primary-700 flex items-center gap-1 shadow-sm">
+                        <BadgeCheck size={12} className="text-blue-500" /> Verified
+                      </div>
                     )}
                   </div>
 
-                  <div className="mt-5 flex gap-2">
-                    <button className="flex-1 py-2.5 bg-gradient-to-r from-primary-500 to-accent-500 text-white font-bold text-sm rounded-xl shadow-md shadow-primary-500/20 hover:shadow-primary-500/30 transition-all btn-shine">
-                      Connect
-                    </button>
-                    <button className="py-2.5 px-4 bg-slate-100 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-200 transition">
-                      View
-                    </button>
+                  <div className="pt-14 p-6">
+                    <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                      {user.fullName}
+                      <span className="text-sm font-normal text-slate-400">{user.age || ''}</span>
+                    </h3>
+                    <p className="text-sm text-slate-500 flex items-center gap-1 mt-0.5">
+                      <MapPin size={13} /> {user.city || 'Unknown'}
+                    </p>
+
+                    {user.bio && <p className="text-sm text-slate-600 mt-3 line-clamp-2">{user.bio}</p>}
+
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {user.interests?.slice(0, 4).map((interest, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold">
+                          {interest}
+                        </span>
+                      ))}
+                      {user.interests?.length > 4 && (
+                        <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-full text-xs font-semibold">
+                          +{user.interests.length - 4}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-5 flex gap-2">
+                      {isFriend ? (
+                        <button disabled className="flex-1 py-2.5 bg-slate-100 text-slate-500 font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+                          <Check size={16} /> Connected
+                        </button>
+                      ) : hasSent ? (
+                        <button disabled className="flex-1 py-2.5 bg-amber-50 text-amber-600 font-bold text-sm rounded-xl flex items-center justify-center gap-2">
+                          <Clock size={16} /> Pending
+                        </button>
+                      ) : hasReceived ? (
+                        <button onClick={() => handleAccept(hasReceived._id)} className="flex-1 py-2.5 bg-emerald-500 text-white font-bold text-sm rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2">
+                          <Check size={16} /> Accept Request
+                        </button>
+                      ) : (
+                        <button onClick={() => handleConnect(user._id)} className="flex-1 py-2.5 bg-gradient-to-r from-primary-500 to-accent-500 text-white font-bold text-sm rounded-xl shadow-md shadow-primary-500/20 hover:shadow-primary-500/30 transition-all btn-shine flex items-center justify-center gap-2">
+                          <UserPlus size={16} /> Connect
+                        </button>
+                      )}
+                      <button className="py-2.5 px-4 bg-slate-100 text-slate-600 font-semibold text-sm rounded-xl hover:bg-slate-200 transition">
+                        View
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
