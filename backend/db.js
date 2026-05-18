@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs');
 
 const users = [];
 const hangouts = [];
+const conversations = [];
+const messages = [];
+const friendRequests = [];
 
 const seedDB = async () => {
   if (users.length > 0) return; // Already seeded
@@ -25,7 +28,21 @@ const seedDB = async () => {
   ];
 
   hangouts.push(...dummyHangouts);
+  
+  // Seed some dummy conversations and messages
+  const dummyConversations = [
+    { _id: 'c1', members: ['1', '2'], updatedAt: new Date().toISOString() },
+    { _id: 'c2', members: ['1', '3'], updatedAt: new Date().toISOString() }
+  ];
+  conversations.push(...dummyConversations);
+
+  const dummyMessages = [
+    { _id: 'm1', conversationId: 'c1', sender: '2', text: 'Hey there! Are you coming to the coffee meetup?', createdAt: new Date(Date.now() - 3600000).toISOString() },
+    { _id: 'm2', conversationId: 'c1', sender: '1', text: 'Yes! I will be there in about 20 minutes.', createdAt: new Date(Date.now() - 3500000).toISOString() }
+  ];
+  messages.push(...dummyMessages);
+  
   console.log('In-memory cache seeded with dummy data.');
 };
 
-module.exports = { users, hangouts, seedDB };
+module.exports = { users, hangouts, conversations, messages, seedDB };
